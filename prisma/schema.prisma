@@ -1,0 +1,52 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+  previewFeatures = ["fullTextSearch"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+
+model User {
+  id        Int       @id @default(autoincrement())
+  name      String?   @db.VarChar(255)
+  email     String    @unique @db.VarChar(255)
+  wallet    BigInt    @db.BigInt @default(0)
+  verify    Boolean   @db.Boolean @default(false)
+  pass      String    @db.Text
+  role      Int       @db.Integer @default(0)
+  orders    Purchase[]
+}
+
+model Purchase {
+  id          Int       @id @default(autoincrement())
+  title       String    @db.VarChar(255)
+  product     Product[]
+  buyer       User      @relation(fields: [buyerId], references: [id])
+  buyerId     Int
+  state       Int       @db.Integer
+  createdAt   DateTime  @default(now()) @db.Timestamp(6)
+}
+
+model Product {
+  id          Int       @id @default(autoincrement())
+  name        String    @db.VarChar(255)
+  price       BigInt    @db.BigInt
+  desc        String    @db.Text
+  cat         Category  @relation(fields: [catId], references: [id])
+  catId       Int
+  picture     String    @db.Text @unique
+  createdAt   DateTime  @default(now()) @db.Timestamp(6)
+  sales       Purchase[]
+}
+
+model Category {
+  id          Int       @id @default(autoincrement())
+  name        String    @db.VarChar(255) @unique
+  products    Product[]
+}
